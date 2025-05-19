@@ -141,6 +141,11 @@ class vLLMRollout(BaseRollout):
             if hasattr(SamplingParams(), str(k)):
                 kwargs[k] = config.get(k)
 
+        if hasattr(config, "min_tokens"):
+            if config.min_tokens == kwargs["max_tokens"]:
+                kwargs['ignore_eos'] = True
+                kwargs['stop_token_ids'] = [151645, 151643]
+
         print(f"kwargs: {kwargs}")
         self.sampling_params = SamplingParams(**kwargs)
 

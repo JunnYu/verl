@@ -396,7 +396,8 @@ class RayPPOTrainer(object):
                                          filter_prompts=True,
                                          return_raw_chat=self.config.data.get('return_raw_chat', False),
                                          truncation=self.config.data.get('truncation', 'error'),
-                                         filter_overlong_prompts=self.config.data.filter_overlong_prompts)
+                                         filter_overlong_prompts=self.config.data.filter_overlong_prompts,
+                                         apply_chat_template=self.config.data.get('apply_chat_template', True))
         assert self.train_dataset.truncation == self.config.data.get(
             'truncation', 'error'
         ), f'dataset truncation {self.train_dataset.truncation} must be the same as config {self.config.data.get("truncation", "error")}'
@@ -424,7 +425,8 @@ class RayPPOTrainer(object):
                                        filter_prompts=True,
                                        return_raw_chat=self.config.data.get('return_raw_chat', False),
                                        truncation=self.config.data.get('truncation', 'error'),
-                                       filter_overlong_prompts=self.config.data.filter_overlong_prompts)
+                                       filter_overlong_prompts=self.config.data.filter_overlong_prompts,
+                                       apply_chat_template=self.config.data.get('apply_chat_template', True))
         assert self.val_dataset.truncation == self.config.data.get(
             'truncation', 'error'
         ), f'dataset truncation {self.val_dataset.truncation} must be the same as config {self.config.data.get("truncation", "error")}'
@@ -569,7 +571,15 @@ class RayPPOTrainer(object):
         metric_dict = {}
         for data_source, rewards in data_source_reward.items():
             metric_dict[f'val/test_score/{data_source}'] = np.mean(rewards)
-
+            # count_equal_max
+            try:
+                max_reward = float(self.config.actor_rollout_ref.rollout.val_kwargs.max_reward)
+            except:
+                max_reward = -1
+            if max_reward > 0:
+                count_equal_max = sum(1 for reward in rewards if float(reward) == max_reward)
+                total_count = len(rewards)
+                metric_dict[f'val/test_score/{data_source}_accuracy'] = count_equal_max / total_count if total_count > 0 else 0
         return metric_dict
 
     def init_workers(self):

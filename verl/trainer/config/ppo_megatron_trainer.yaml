@@ -12,6 +12,7 @@ data:
   shuffle: True
   filter_overlong_prompts: False # for large-scale dataset, filtering overlong prompts could be timeconsuming. You should disable this and set `truncation='left'
   truncation: error
+  apply_chat_template: true
 
 actor_rollout_ref:
   hybrid_engine: True
@@ -100,6 +101,7 @@ actor_rollout_ref:
       temperature: 0
       n: 1
       do_sample: False # default eager for validation
+      max_reward: -1 # -1 mean no compute accuracy
 
 critic:
   strategy: megatron

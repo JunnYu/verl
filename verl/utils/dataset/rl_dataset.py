@@ -89,7 +89,8 @@ class RLHFDataset(Dataset):
                  chat_template_func=None,
                  return_raw_chat=False,
                  truncation='error',
-                 filter_overlong_prompts=False):
+                 filter_overlong_prompts=False,
+                 apply_chat_template=True):
         if not isinstance(parquet_files, (List, ListConfig)):
             parquet_files = [parquet_files]
 
@@ -108,6 +109,7 @@ class RLHFDataset(Dataset):
         self.chat_template_func = chat_template_func
         self.truncation = truncation
         self.filter_overlong_prompts = filter_overlong_prompts
+        self.apply_chat_template = apply_chat_template
 
         # whether to store the dataset in state_dict()
         # default not store
@@ -161,7 +163,11 @@ class RLHFDataset(Dataset):
 
         chat = row_dict.pop(self.prompt_key)
 
-        prompt_with_chat_template = self.tokenizer.apply_chat_template(chat, add_generation_prompt=True, tokenize=False)
+        if self.apply_chat_template:
+            prompt_with_chat_template = self.tokenizer.apply_chat_template(chat, add_generation_prompt=True, tokenize=False)
+        else:
+            assert len(chat) == 1, f'When apply_chat_template is False, only support single chat, but got {len(chat)}'
+            prompt_with_chat_template = chat[0]['content']
 
         is_multi_modal = self.image_key in row_dict
         if is_multi_modal:  # expand image token

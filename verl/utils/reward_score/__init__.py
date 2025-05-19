@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# from . import gsm8k, math, prime_math, prime_code
+# from . import gsm8k, math, prime_math, prime_code, kk
 
 
 def _default_compute_score(data_source, solution_str, ground_truth, extra_info=None):
@@ -41,6 +41,9 @@ def _default_compute_score(data_source, solution_str, ground_truth, extra_info=N
     elif data_source in ['hiyouga/geometry3k']:
         from . import geo3k
         res = geo3k.compute_score(solution_str, ground_truth)
+    elif data_source in ['kk', 'knights-and-knaves', 'kk_logic']:
+        from . import kk
+        res = kk.compute_score(solution_str, ground_truth, format_reward=1.0, answer_reward=1.0)
     else:
         raise NotImplementedError
 
